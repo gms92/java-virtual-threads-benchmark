@@ -50,8 +50,8 @@ At 200 VUs this means up to **10,000 concurrent blocking tasks** per second — 
 | Metric | Java 17 | Java 21 | Java 25 |
 |---|---|---|---|
 | Success rate | ~74–82% | 100% | 100% |
-| p95 latency (plateau) | 60s (timeout) | ~350ms | ~350ms |
-| p99 latency (plateau) | 60s (timeout) | ~600ms | ~600ms |
+| p95 latency (plateau) | 60s (timeout) | ~120ms | ~120ms |
+| p99 latency (plateau) | 60s (timeout) | ~120ms | ~120ms |
 | Peak live threads | 2000+ | ~25 | ~25 |
 
 > Java 17 exhausts its OS thread pool under 200 VUs, causing requests to queue and eventually timeout. Java 21/25 handle the same load effortlessly — virtual threads are parked while waiting for I/O, freeing carrier threads for other work.
