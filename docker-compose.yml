@@ -1,0 +1,87 @@
+services:
+  app-java17:
+    build:
+      context: ./java17
+    environment:
+      - MANAGEMENT_METRICS_DISTRIBUTION_PERCENTILES-HISTOGRAM_HTTP_SERVER_REQUESTS=true
+    ports:
+      - "8081:8081"
+    networks:
+      - benchmark-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  app-java21:
+    build:
+      context: ./java21
+    environment:
+      - MANAGEMENT_METRICS_DISTRIBUTION_PERCENTILES-HISTOGRAM_HTTP_SERVER_REQUESTS=true
+    ports:
+      - "8082:8082"
+    networks:
+      - benchmark-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  app-java26:
+    build:
+      context: ./java25
+    environment:
+      - MANAGEMENT_METRICS_DISTRIBUTION_PERCENTILES-HISTOGRAM_HTTP_SERVER_REQUESTS=true
+    ports:
+      - "8083:8083"
+    networks:
+      - benchmark-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - benchmark-net
+    depends_on:
+      app-java17:
+        condition: service_healthy
+      app-java21:
+        condition: service_healthy
+      app-java26:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - benchmark-net
+    depends_on:
+      app-java17:
+        condition: service_healthy
+      app-java21:
+        condition: service_healthy
+      app-java26:
+        condition: service_healthy
+
+networks:
+  benchmark-net:
+    driver: bridge
